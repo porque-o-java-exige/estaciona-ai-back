@@ -68,7 +68,6 @@
             <artifactId>spring-boot-starter-webmvc-test</artifactId>
             <scope>test</scope>
         </dependency>
-<!--    Dependencias futuras do projeto
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
@@ -81,6 +80,8 @@
             <version>1.6.3</version>
             <scope>compile</scope>
         </dependency>
+<!--    Dependencias futuras do projeto
+
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
