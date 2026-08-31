@@ -1,5 +1,6 @@
 package com.estaciona_ai.exceptions;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,5 +26,12 @@ import java.util.Map;
             error.put("error", "Dádos inválidos");
             error.put("message", ex.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+        @ExceptionHandler(EntityNotFoundException.class)
+        public ResponseEntity<Map<String, String>> handlerEntityNotFound(EntityNotFoundException ex){
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "usuário não encontrado");
+            error.put("message", ex.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
         }
 }
