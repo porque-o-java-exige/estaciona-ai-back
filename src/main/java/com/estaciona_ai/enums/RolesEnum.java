@@ -1,5 +1,5 @@
 package com.estaciona_ai.enums;
 
 public enum RolesEnum {
-    USER, ADMIN
+    ROLE_USER, ROLE_ADMIN
 }
