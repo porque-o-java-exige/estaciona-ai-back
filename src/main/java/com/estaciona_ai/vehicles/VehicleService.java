@@ -51,5 +51,24 @@ public class VehicleService {
         return vehicleMapper.toResponseList(vehicleRepository.findByOwnerId(ownerId));
     }
 
+    // Update vehicle by id
+    @Transactional
+    public VehicleResponse updateVehicleById(UUID vehicleId, VehicleRequest vehicleReq, UUID ownerId) {
+
+        VehicleEntity vehicle = vehicleRepository.findById(vehicleId)
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Veículo não encontrado com o id " + vehicleId));
+
+        if (!vehicle.getOwner().getId().equals(ownerId)) {
+            throw new IllegalArgumentException("Você não tem permissão pra alterar os dados desse carro");
+        }
+        if (!vehicle.getLicensePlate().equalsIgnoreCase(vehicleReq.licensePlate())
+                && vehicleRepository.existsByLicensePlate(vehicleReq.licensePlate())) {
+            throw new IllegalArgumentException("A nova placa " + vehicleReq.licensePlate() + " já está em uso");
+        }
+        vehicleMapper.updateEntityFromDto(vehicleReq, vehicle);
+        return vehicleMapper.toResponse(vehicleRepository.save(vehicle));
+    }
+
 
 }
