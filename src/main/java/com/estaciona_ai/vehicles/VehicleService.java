@@ -70,5 +70,15 @@ public class VehicleService {
         return vehicleMapper.toResponse(vehicleRepository.save(vehicle));
     }
 
+    // Delete vehicle by id
+    @Transactional
+    public void deleteVehicleById(UUID vehicleId, UUID ownerId) {
+        VehicleEntity vehicle = vehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new EntityNotFoundException("Veículo não encontrado com o ID: " + vehicleId));
 
+        if (!vehicle.getOwner().getId().equals(ownerId)) {
+            throw new IllegalArgumentException("Você não tem permissão para deletar este veículo.");
+        }
+        vehicleRepository.delete(vehicle);
+    }
 }
