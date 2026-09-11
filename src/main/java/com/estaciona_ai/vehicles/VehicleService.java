@@ -2,88 +2,37 @@ package com.estaciona_ai.vehicles;
 
 import com.estaciona_ai.users.UserEntity;
 import com.estaciona_ai.users.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class VehicleService {
 
     private final VehicleRepository vehicleRepository;
     private final UserRepository userRepository;
+    private final VehicleMapper vehicleMapper;
 
-    public VehicleService(
-            VehicleRepository vehicleRepository,
-            UserRepository userRepository
-    ) {
-        this.vehicleRepository = vehicleRepository;
-        this.userRepository = userRepository;
-    }
+    // Create vehicle method
+    @Transactional
+    public VehicleResponse createVehicle(VehicleRequest vehicleReq, UUID ownerId) {
 
-    public VehicleResponse createVehicle(
-            VehicleRequest dto,
-            UUID userId
-    ) {
-
-        UserEntity user = userRepository.findById(userId)
+        UserEntity owner = userRepository.findById(ownerId)
                 .orElseThrow(() ->
-                        new RuntimeException("Usuário não encontrado"));
+                        new EntityNotFoundException("Usuário não encontrado"));
 
-        VehicleEntity vehicle = new VehicleEntity();
-
-        vehicle.setUser(user);
-        vehicle.setLicensePlate(dto.getLicensePlate());
-        vehicle.setYear(dto.getYear());
-        vehicle.setModel(dto.getModel());
-        vehicle.setColor(dto.getColor());
-
-        VehicleEntity savedVehicle = vehicleRepository.save(vehicle);
-
-        return new VehicleResponse(savedVehicle);
+        if (vehicleRepository.existsByLicensePlate(vehicleReq.licensePlate())) {
+            throw new IllegalArgumentException("já existe um veículo cadastrado com essa placa");
+        }
+        VehicleEntity vehicle = vehicleMapper.toEntity(vehicleReq);
+        vehicle.setOwner(owner);
+        return vehicleMapper.toResponse(vehicleRepository.save(vehicle));
     }
 
-    public List<VehicleResponse> getAllVehicles() {
-        return vehicleRepository.findAll()
-                .stream()
-                .map(VehicleResponse::new)
-                .toList();
-    }
 
-    public VehicleResponse getVehicleById(UUID id) {
-
-        VehicleEntity vehicle = vehicleRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("Veículo não encontrado"));
-
-        return new VehicleResponse(vehicle);
-    }
-
-    public VehicleResponse updateVehicle(
-            UUID id,
-            VehicleRequest dto
-    ) {
-
-        VehicleEntity vehicle = vehicleRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("Veículo não encontrado"));
-
-        vehicle.setLicensePlate(dto.getLicensePlate());
-        vehicle.setYear(dto.getYear());
-        vehicle.setModel(dto.getModel());
-        vehicle.setColor(dto.getColor());
-
-        VehicleEntity updatedVehicle = vehicleRepository.save(vehicle);
-
-        return new VehicleResponse(updatedVehicle);
-    }
-
-    public void deleteVehicle(UUID id) {
-
-        VehicleEntity vehicle = vehicleRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("Veículo não encontrado"));
-
-        vehicleRepository.delete(vehicle);
-    }
 }
