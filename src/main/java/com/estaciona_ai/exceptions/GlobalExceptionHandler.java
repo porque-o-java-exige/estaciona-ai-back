@@ -15,7 +15,7 @@ import java.util.Map;
         @ExceptionHandler(DuplicateKeyException.class)
         public ResponseEntity<Map<String, String>> handleDuplicateKey(DuplicateKeyException ex){
             Map<String, String> error = new HashMap<>();
-            error.put("error", "email já cadastrado");
+            error.put("error", "registro duplicado");
             error.put("message", ex.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
         }
@@ -23,14 +23,14 @@ import java.util.Map;
         @ExceptionHandler(IllegalArgumentException.class)
         public ResponseEntity<Map <String, String>> handleIllegalArgumentException(IllegalArgumentException ex){
             Map<String, String> error = new HashMap<>();
-            error.put("error", "Dádos inválidos");
+            error.put("error", "dados inválidos");
             error.put("message", ex.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
         }
         @ExceptionHandler(EntityNotFoundException.class)
         public ResponseEntity<Map<String, String>> handlerEntityNotFound(EntityNotFoundException ex){
             Map<String, String> error = new HashMap<>();
-            error.put("error", "usuário não encontrado");
+            error.put("error", "recurso não encontrado");
             error.put("message", ex.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
         }
