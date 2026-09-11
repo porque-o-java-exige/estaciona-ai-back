@@ -34,5 +34,22 @@ public class VehicleService {
         return vehicleMapper.toResponse(vehicleRepository.save(vehicle));
     }
 
+    // Get vehicle by id method
+    @Transactional(readOnly = true)
+    public VehicleResponse getVehicleById(UUID vehicleId) {
+        return vehicleRepository.findById(vehicleId)
+                .map(vehicleMapper::toResponse)
+                .orElseThrow(() -> new EntityNotFoundException("Veículo não encontrado com o ID: " + vehicleId));
+    }
+
+    // Get vehicles by ower method
+    @Transactional(readOnly = true)
+    public List<VehicleResponse> getVehiclesByOwner(UUID ownerId) {
+        if (!userRepository.existsById(ownerId)) {
+            throw new EntityNotFoundException("Usuário não encontrado com o ID: " + ownerId);
+        }
+        return vehicleMapper.toResponseList(vehicleRepository.findByOwnerId(ownerId));
+    }
+
 
 }
