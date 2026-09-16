@@ -3,6 +3,7 @@ package com.estaciona_ai.garages;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
+import java.util.Set;
 
 public record GarageRequest(
         @NotBlank
@@ -17,19 +18,12 @@ public record GarageRequest(
         Double longitude,
         @Size(max = 1000)
         String description,
-        @Size(max = 500)
-        String photo,
-        @NotNull
-        @DecimalMin(value = "0.0", inclusive = true)
-        BigDecimal price,
+        Set<@NotBlank @Size(max = 50) String> features,
         @NotNull
         Boolean available,
-        @NotNull
-        @DecimalMin(value = "0.0", inclusive = true)
+        @DecimalMin("0.0")
         BigDecimal pricePerDay,
-        @NotNull
-        @DecimalMin(value = "0.0", inclusive = true)
+        @DecimalMin("0.0")
         BigDecimal pricePerHour
-
 ) {
 }
