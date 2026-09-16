@@ -24,6 +24,7 @@ public class GarageService {
         UserEntity owner = userRepository.findById(ownerId)
                 .orElseThrow(() ->
                         new EntityNotFoundException("Usuário não encontrado"));
+        validateGaragePricing(garageReq);
         GarageEntity garage = garageMapper.toEntity(garageReq);
         garage.setOwner(owner);
         return garageMapper.toResponse(
@@ -39,6 +40,11 @@ public class GarageService {
                         new EntityNotFoundException(
                                 "Garagem não encontrada com o ID: " + garageId
                         ));
+    }
+
+    @Transactional(readOnly = true)
+    public List<GarageResponse> getAllAvailableGarages() {
+        return garageMapper.toResponseList(garageRepository.findByAvailableTrue());
     }
 
     @Transactional(readOnly = true)
@@ -70,6 +76,7 @@ public class GarageService {
                     "Você não tem permissão para alterar os dados dessa garagem"
             );
         }
+        validateGaragePricing(garageReq);
         garageMapper.updateEntityFromDto(garageReq, garage);
         return garageMapper.toResponse(
                 garageRepository.save(garage)
@@ -89,5 +96,11 @@ public class GarageService {
             );
         }
         garageRepository.delete(garage);
+    }
+    private void validateGaragePricing(GarageRequest request) {
+        // Se ambos os preços vierem null no JSON, lança exceção
+        if (request.pricePerHour() == null && request.pricePerDay() == null) {
+            throw new IllegalArgumentException("A garagem deve ter pelo menos um preço cadastrado (por hora ou por dia).");
+        }
     }
 }
