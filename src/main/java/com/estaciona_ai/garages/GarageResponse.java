@@ -1,7 +1,10 @@
 package com.estaciona_ai.garages;
 
+import org.mapstruct.Mapping;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 public record GarageResponse(
@@ -12,7 +15,7 @@ public record GarageResponse(
         Double latitude,
         Double longitude,
         String description,
-        String photo,
+        Set<String> features,
         BigDecimal price,
         Boolean available,
         LocalDateTime createdAt,
