@@ -11,6 +11,7 @@ public interface GarageMapper {
 
     GarageEntity toEntity(GarageRequest garageReq);
 
+    @Mapping(source = "id", target = "garageId")
     @Mapping(source = "owner.id", target = "ownerId")
     GarageResponse toResponse(GarageEntity garageEnt);
 
