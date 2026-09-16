@@ -10,4 +10,5 @@ import java.util.UUID;
 public interface GarageRepository extends JpaRepository<GarageEntity, UUID> { ;
 
     List<GarageEntity> findByOwnerId(UUID ownerId);
+    List<GarageEntity> findByAvailableTrue();
 }
