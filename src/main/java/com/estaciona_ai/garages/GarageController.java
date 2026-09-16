@@ -33,6 +33,11 @@ public class GarageController {
     }
 
     @GetMapping
+    public ResponseEntity<List<GarageResponse>> getAllAvailableGarages() {
+        return ResponseEntity.ok(garageService.getAllAvailableGarages());
+    }
+
+    @GetMapping("/owner")
     public ResponseEntity<List<GarageResponse>> getGaragesByOwner(
             @RequestHeader("x-user-id") UUID ownerId
     ) {
