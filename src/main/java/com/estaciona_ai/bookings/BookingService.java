@@ -65,6 +65,30 @@ public class BookingService {
         return bookingMapper.toResponse(bookingRepository.save(booking));
     }
 
+    @Transactional(readOnly = true)
+    public List<BookingResponse> getBookingsByDriver(UUID driverId) {
+        return bookingMapper.toResponseList(bookingRepository.findByDriverId(driverId));
+    }
+
+    @Transactional(readOnly = true)
+    public BookingResponse getBookingById(UUID bookingId) {
+        return bookingRepository.findById(bookingId)
+                .map(bookingMapper::toResponse)
+                .orElseThrow(() -> new EntityNotFoundException("Reserva não encontrada com ID: " + bookingId));
+    }
+
+    @Transactional(readOnly = true)
+    public List<BookingResponse> getBookingsByGarage(UUID garageId, UUID ownerId) {
+        GarageEntity garage = garageRepository.findById(garageId)
+                .orElseThrow(() -> new EntityNotFoundException("Garagem não encontrada"));
+
+        if (!garage.getOwner().getId().equals(ownerId)) {
+            throw new IllegalArgumentException("Você não tem permissão para ver as reservas desta garagem.");
+        }
+
+        return bookingMapper.toResponseList(bookingRepository.findByGarageId(garageId));
+    }
+
 
 
     private BigDecimal calculateTotalAmount(GarageEntity garage, BookingRequest request) {
