@@ -89,7 +89,26 @@ public class BookingService {
         return bookingMapper.toResponseList(bookingRepository.findByGarageId(garageId));
     }
 
+    @Transactional
+    public BookingResponse cancelBooking(UUID bookingId, UUID driverId) {
+        BookingEntity booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new EntityNotFoundException("Reserva não encontrada com ID: " + bookingId));
 
+        if (!booking.getDriver().getId().equals(driverId)) {
+            throw new IllegalArgumentException("Você não tem permissão para cancelar esta reserva.");
+        }
+
+        if (booking.getStatus() == BookingStatus.CANCELLED) {
+            throw new IllegalArgumentException("Esta reserva já está cancelada.");
+        }
+
+        if (booking.getStatus() == BookingStatus.COMPLETED) {
+            throw new IllegalArgumentException("Não é possível cancelar uma reserva que já foi finalizada.");
+        }
+
+        booking.setStatus(BookingStatus.CANCELLED);
+        return bookingMapper.toResponse(bookingRepository.save(booking));
+    }
 
     private BigDecimal calculateTotalAmount(GarageEntity garage, BookingRequest request) {
         if (request.bookingType() == BookingType.HOURLY) {
