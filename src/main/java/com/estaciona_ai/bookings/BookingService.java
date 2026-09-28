@@ -61,7 +61,15 @@ public class BookingService {
         booking.setBookingType(request.bookingType());
         booking.setTotalAmount(totalAmount);
         booking.setStatus(BookingStatus.PENDING);
+        boolean hasConflict = bookingRepository.existsOverlappingBooking(
+                request.garageId(),
+                request.startDateTime(),
+                request.endDateTime()
+        );
 
+        if (hasConflict) {
+            throw new IllegalArgumentException("A garagem já possui uma reserva confirmada ou pendente para este horário.");
+        }
         return bookingMapper.toResponse(bookingRepository.save(booking));
     }
 
