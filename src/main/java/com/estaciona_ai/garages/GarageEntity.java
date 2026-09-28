@@ -2,7 +2,6 @@ package com.estaciona_ai.garages;
 
 import com.estaciona_ai.users.UserEntity;
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
