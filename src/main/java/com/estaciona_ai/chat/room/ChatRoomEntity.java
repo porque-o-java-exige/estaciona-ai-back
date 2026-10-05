@@ -1,6 +1,7 @@
 package com.estaciona_ai.chat.room;
 
 import com.estaciona_ai.bookings.BookingEntity;
+import com.estaciona_ai.garages.GarageEntity;
 import com.estaciona_ai.users.UserEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -20,7 +21,11 @@ public class ChatRoomEntity {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "booking_id", nullable = false)
+    @JoinColumn(name = "garage_id", nullable = false)
+    private GarageEntity garage;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "booking_id", nullable = true)
     private BookingEntity booking;
 
     @ManyToOne(fetch = FetchType.LAZY)

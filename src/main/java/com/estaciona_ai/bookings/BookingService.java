@@ -1,5 +1,7 @@
 package com.estaciona_ai.bookings;
 
+import com.estaciona_ai.chat.room.ChatRoomEntity;
+import com.estaciona_ai.chat.room.ChatRoomRepository;
 import com.estaciona_ai.garages.GarageEntity;
 import com.estaciona_ai.garages.GarageRepository;
 import com.estaciona_ai.users.UserEntity;
@@ -13,8 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -25,6 +27,7 @@ public class BookingService {
     private final UserRepository userRepository;
     private final GarageRepository garageRepository;
     private final VehicleRepository vehicleRepository;
+    private final ChatRoomRepository chatRoomRepository;
     private final BookingMapper bookingMapper;
 
     @Transactional
@@ -50,6 +53,16 @@ public class BookingService {
             throw new IllegalArgumentException("A data/hora final deve ser posterior à data/hora inicial.");
         }
 
+        boolean hasConflict = bookingRepository.existsOverlappingBooking(
+                request.garageId(),
+                request.startDateTime(),
+                request.endDateTime()
+        );
+
+        if (hasConflict) {
+            throw new IllegalArgumentException("A garagem já possui uma reserva confirmada ou pendente para este horário.");
+        }
+
         BigDecimal totalAmount = calculateTotalAmount(garage, request);
 
         BookingEntity booking = new BookingEntity();
@@ -61,16 +74,13 @@ public class BookingService {
         booking.setBookingType(request.bookingType());
         booking.setTotalAmount(totalAmount);
         booking.setStatus(BookingStatus.PENDING);
-        boolean hasConflict = bookingRepository.existsOverlappingBooking(
-                request.garageId(),
-                request.startDateTime(),
-                request.endDateTime()
-        );
 
-        if (hasConflict) {
-            throw new IllegalArgumentException("A garagem já possui uma reserva confirmada ou pendente para este horário.");
-        }
-        return bookingMapper.toResponse(bookingRepository.save(booking));
+        BookingEntity savedBooking = bookingRepository.save(booking);
+
+        // Vincula a reserva a uma sala existente ou cria uma nova sala
+        linkOrCreateChatRoom(savedBooking, driver, garage);
+
+        return bookingMapper.toResponse(savedBooking);
     }
 
     @Transactional(readOnly = true)
@@ -119,20 +129,40 @@ public class BookingService {
     }
 
     private BigDecimal calculateTotalAmount(GarageEntity garage, BookingRequest request) {
+        long minutes = Duration.between(request.startDateTime(), request.endDateTime()).toMinutes();
+
         if (request.bookingType() == BookingType.HOURLY) {
             if (garage.getPricePerHour() == null) {
                 throw new IllegalArgumentException("Esta garagem não aceita reservas por hora.");
             }
-            long hours = Duration.between(request.startDateTime(), request.endDateTime()).toHours();
+            long hours = (long) Math.ceil((double) minutes / 60.0);
             long effectiveHours = Math.max(hours, 1);
             return garage.getPricePerHour().multiply(BigDecimal.valueOf(effectiveHours));
         } else {
             if (garage.getPricePerDay() == null) {
                 throw new IllegalArgumentException("Esta garagem não aceita reservas por dia.");
             }
-            long days = ChronoUnit.DAYS.between(request.startDateTime().toLocalDate(), request.endDateTime().toLocalDate());
+            long days = (long) Math.ceil((double) minutes / (60.0 * 24.0));
             long effectiveDays = Math.max(days, 1);
             return garage.getPricePerDay().multiply(BigDecimal.valueOf(effectiveDays));
+        }
+    }
+
+    private void linkOrCreateChatRoom(BookingEntity booking, UserEntity driver, GarageEntity garage) {
+        Optional<ChatRoomEntity> existingRoom = chatRoomRepository
+                .findByGarageIdAndDriverId(garage.getId(), driver.getId());
+
+        if (existingRoom.isPresent()) {
+            ChatRoomEntity room = existingRoom.get();
+            room.setBooking(booking);
+            chatRoomRepository.save(room);
+        } else {
+            ChatRoomEntity newRoom = new ChatRoomEntity();
+            newRoom.setGarage(garage);
+            newRoom.setDriver(driver);
+            newRoom.setOwner(garage.getOwner());
+            newRoom.setBooking(booking);
+            chatRoomRepository.save(newRoom);
         }
     }
 }
