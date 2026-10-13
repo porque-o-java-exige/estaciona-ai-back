@@ -2,6 +2,9 @@ package com.estaciona_ai.garages;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -51,6 +54,16 @@ public class GarageController {
     ) {
         GarageResponse garageRes = garageService.getGarageById(id);
         return ResponseEntity.ok(garageRes);
+    }
+
+    @GetMapping("/nearby")
+    public ResponseEntity<Page<GarageNearbyResponse>> getNearbyGarages(
+            @RequestParam double lat,
+            @RequestParam double lng,
+            @RequestParam(defaultValue = "10.0") double radius,
+            @PageableDefault(size = 10, page = 0) Pageable pageable
+    ) {
+        return ResponseEntity.ok(garageService.findNearbyGarages(lat, lng, radius, pageable));
     }
 
     @PutMapping("/{id}")
