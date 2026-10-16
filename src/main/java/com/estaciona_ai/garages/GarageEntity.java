@@ -10,9 +10,7 @@ import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Getter
 @Setter
@@ -39,6 +37,13 @@ public class GarageEntity {
     private Boolean available;
     private BigDecimal pricePerDay;
     private BigDecimal pricePerHour;
+    @Column(name = "cover_image_url")
+    private String coverImageUrl; // Imagem exibida no pin do mapa e nos cards de busca
+
+    @ElementCollection
+    @CollectionTable(name = "garage_images", joinColumns = @JoinColumn(name = "garage_id"))
+    @Column(name = "image_url")
+    private List<String> images = new ArrayList<>(); // Galeria de fotos da garagem
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
