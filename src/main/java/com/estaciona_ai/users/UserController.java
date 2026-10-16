@@ -1,8 +1,10 @@
 package com.estaciona_ai.users;
 
 import jakarta.validation.Valid;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
@@ -48,5 +50,13 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
         userService.deleteUserById(id);
         return ResponseEntity.noContent().build();
+    }
+    @PatchMapping(value = "/{id}/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<UserResponse> updateUserPhoto(
+            @PathVariable UUID id,
+            @RequestParam("file") MultipartFile file
+    ) {
+        UserResponse updatedUser = userService.updateUserPhoto(id, file);
+        return ResponseEntity.ok(updatedUser);
     }
 }
