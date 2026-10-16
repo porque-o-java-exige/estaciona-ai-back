@@ -2,9 +2,11 @@ package com.estaciona_ai.users;
 
 import com.estaciona_ai.enums.RolesEnum;
 import com.estaciona_ai.enums.StatusEnum;
+import com.estaciona_ai.storage.StorageService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,10 +16,12 @@ import java.util.UUID;
 public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final StorageService storageService; // Injete a interface do Storage
 
-    public UserService(UserRepository userRepository, UserMapper userMapper) {
+    public UserService(UserRepository userRepository, UserMapper userMapper, StorageService storageService) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.storageService = storageService;
     }
 
     public UserResponse createUser(UserRequest userReq){
@@ -37,7 +41,6 @@ public class UserService {
 
     public List<UserResponse> getAllUsers() {
         List<UserEntity> users = userRepository.findAll();
-
         return userMapper.toResponseList(users);
     }
 
@@ -48,15 +51,38 @@ public class UserService {
     }
 
     public UserResponse updateUser(UUID id, UserRequest userReq){
-        UserEntity user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado com o id: " + id));
+        UserEntity user = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado com o id: " + id));
         userMapper.updateEntityFromDto(userReq, user);
-        user.setUpdatedAt((LocalDateTime.now()));
+        user.setUpdatedAt(LocalDateTime.now());
+        UserEntity updatedUser = userRepository.save(user);
+        return userMapper.toResponse(updatedUser);
+    }
+
+    // --- NOVO MÉTODOS DE ATUALIZAÇÃO DA FOTO ---
+    public UserResponse updateUserPhoto(UUID id, MultipartFile file) {
+        UserEntity user = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado com o id: " + id));
+
+        // 1. Se o usuário já tiver foto, deleta a antiga da Azure para não acumular lixo na nuvem
+        if (user.getPhotoUrl() != null && !user.getPhotoUrl().isBlank()) {
+            storageService.delete(user.getPhotoUrl());
+        }
+
+        // 2. Faz upload da nova foto na pasta "users" da Azure
+        String newPhotoUrl = storageService.upload(file, "users");
+
+        // 3. Atualiza e salva no banco
+        user.setPhotoUrl(newPhotoUrl);
+        user.setUpdatedAt(LocalDateTime.now());
+
         UserEntity updatedUser = userRepository.save(user);
         return userMapper.toResponse(updatedUser);
     }
 
     public void deleteUserById(UUID id){
-        userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("não existe um usuário com esse id"));
+        userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("não existe um usuário com esse id"));
         userRepository.deleteById(id);
     }
 }
