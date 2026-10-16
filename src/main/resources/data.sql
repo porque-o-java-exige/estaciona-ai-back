@@ -1,4 +1,3 @@
-
 -- 1. Inserindo Usuários (Ryan, Vini, Carlos e Ana)
 INSERT IGNORE INTO users (id, name, email, password, phone_number)
 VALUES
@@ -9,7 +8,7 @@ VALUES
 
 -- 2. Inserindo Garagens
 INSERT IGNORE INTO garages (id, user_id, name, address, latitude, longitude, description, available, price_per_day, price_per_hour, created_at, updated_at)
-VALUES 
+VALUES
     -- Garagem Base (Ryan)
     ('8ad50250-bf0b-4daf-b56f-d0db1703c991', '8f07e730-23e1-47b4-a20e-f667b0961303',
      'Estacionamento Central Paulista', 'Avenida Paulista, 1000 - Bela Vista, São Paulo - SP',
@@ -85,20 +84,44 @@ VALUES (
     'RED'
 );
 
--- 4. Inserindo Reserva do Vini na Garagem do Ryan
+-- 4. Inserindo Reservas do Vini na Garagem do Ryan
 INSERT IGNORE INTO bookings (id, driver_id, garage_id, vehicle_id, start_date_time, end_date_time, total_amount, booking_type, status, created_at)
-VALUES (
-    'e097b41c-9f91-4d99-897e-b122fbbbbaa0',
-    '3db8b175-d1e9-4c82-9849-7c136da927a2',
-    '8ad50250-bf0b-4daf-b56f-d0db1703c991',
-    '38543986-adfe-41b5-ae25-d0767a3538c3',
-    '2026-10-01 14:00:00',
-    '2026-10-01 18:00:00',
-    0.00,
-    'HOURLY',
-    'PENDING',
-    CURRENT_TIMESTAMP
-);
+VALUES
+    -- 1. Reserva Pendente (Para testar bloqueio por status diferente de COMPLETED)
+    ('e097b41c-9f91-4d99-897e-b122fbbbbaa0',
+     '3db8b175-d1e9-4c82-9849-7c136da927a2',
+     '8ad50250-bf0b-4daf-b56f-d0db1703c991',
+     '38543986-adfe-41b5-ae25-d0767a3538c3',
+     '2026-10-01 14:00:00',
+     '2026-10-01 18:00:00',
+     0.00,
+     'HOURLY',
+     'PENDING',
+     CURRENT_TIMESTAMP),
+
+    -- 2. Reserva Concluída Com Avaliações Existentes (Para testar GET e bloqueio por duplicidade)
+    ('f108c52d-0a02-5e00-908f-c233ecccbbb1',
+     '3db8b175-d1e9-4c82-9849-7c136da927a2',
+     '8ad50250-bf0b-4daf-b56f-d0db1703c991',
+     '38543986-adfe-41b5-ae25-d0767a3538c3',
+     '2026-09-15 10:00:00',
+     '2026-09-15 12:00:00',
+     30.00,
+     'HOURLY',
+     'COMPLETED',
+     CURRENT_TIMESTAMP),
+
+    -- 3. Reserva Concluída SEM Avaliações (Para testar criação de novas avaliações via POST no Postman!)
+    ('f209d63e-1b03-6f11-019f-d344fdddccc2',
+     '3db8b175-d1e9-4c82-9849-7c136da927a2',
+     '8ad50250-bf0b-4daf-b56f-d0db1703c991',
+     '38543986-adfe-41b5-ae25-d0767a3538c3',
+     '2026-09-20 08:00:00',
+     '2026-09-20 12:00:00',
+     60.00,
+     'HOURLY',
+     'COMPLETED',
+     CURRENT_TIMESTAMP);
 
 -- 5. Inserindo Sala de Chat vinculada à Garagem e à Reserva
 INSERT IGNORE INTO chat_rooms (id, garage_id, booking_id, driver_id, owner_id, created_at)
@@ -108,5 +131,29 @@ VALUES (
     'e097b41c-9f91-4d99-897e-b122fbbbbaa0',
     '3db8b175-d1e9-4c82-9849-7c136da927a2',
     '8f07e730-23e1-47b4-a20e-f667b0961303',
+    CURRENT_TIMESTAMP
+);
+
+-- 6. Inserindo Avaliação da Garagem (Feita pelo Motorista Vini)
+INSERT IGNORE INTO garage_reviews (id, booking_id, driver_id, garage_id, rating, comment, created_at)
+VALUES (
+    'd4a11111-2222-3333-4444-555555555555',
+    'f108c52d-0a02-5e00-908f-c233ecccbbb1',
+    '3db8b175-d1e9-4c82-9849-7c136da927a2',
+    '8ad50250-bf0b-4daf-b56f-d0db1703c991',
+    5,
+    'Excelente garagem! Muito organizada e o dono foi super atencioso.',
+    CURRENT_TIMESTAMP
+);
+
+-- 7. Inserindo Avaliação do Motorista (Feita pelo Dono Ryan)
+INSERT IGNORE INTO driver_reviews (id, booking_id, owner_id, driver_id, rating, comment, created_at)
+VALUES (
+    'e5b22222-3333-4444-5555-666666666666',
+    'f108c52d-0a02-5e00-908f-c233ecccbbb1',
+    '8f07e730-23e1-47b4-a20e-f667b0961303',
+    '3db8b175-d1e9-4c82-9849-7c136da927a2',
+    5,
+    'Ótimo motorista! Pontual e deixou o veículo perfeitamente estacionado.',
     CURRENT_TIMESTAMP
 );
