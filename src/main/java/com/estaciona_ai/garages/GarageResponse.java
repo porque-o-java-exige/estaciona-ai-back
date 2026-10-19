@@ -2,6 +2,7 @@ package com.estaciona_ai.garages;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -19,6 +20,8 @@ public record GarageResponse(
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         BigDecimal pricePerDay,
-        BigDecimal pricePerHour
+        BigDecimal pricePerHour,
+        String coverImageUrl,
+        List<String> images
 ) {
 }

@@ -25,7 +25,8 @@ public class UserEntity {
     private String email;
     private String password;
     private String phoneNumber;
-    /*private String photoUrl;*/
+    @Column(name = "photo_url")
+    private String photoUrl;
     @Enumerated(EnumType.STRING)
     private RolesEnum roles;
     @Enumerated(EnumType.STRING)
