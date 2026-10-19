@@ -1,4 +1,7 @@
 package com.estaciona_ai.payments;
 
-public class PaymentMapper {
+import org.mapstruct.Mapper;
+
+@Mapper(componentModel = "spring")
+public interface PaymentMapper {
 }

@@ -73,6 +73,12 @@
             <artifactId>azure-storage-blob</artifactId>
             <version>12.28.0</version>
         </dependency>
+        <!-- SDK Java Mercado Pago -->
+        <dependency>
+            <groupId>com.mercadopago</groupId>
+            <artifactId>sdk-java</artifactId>
+            <version>3.7.0</version>
+        </dependency>
 
         <!-- Testes -->
         <dependency>
