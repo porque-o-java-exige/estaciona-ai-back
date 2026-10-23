@@ -40,7 +40,7 @@ public class NotificationService {
         NotificationEntity notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new EntityNotFoundException("Notificação não encontrada com ID: " + notificationId));
 
-        notification.setRead(true);
+        notification.setRead(true); // Método gerado pelo Lombok para o campo 'read'
         notificationRepository.save(notification);
     }
 
