@@ -43,4 +43,22 @@ public class NotificationService {
         notification.setRead(true);
         notificationRepository.save(notification);
     }
+
+    // Método auxiliar pronto para ser chamado pelo PaymentService/BookingService no futuro
+    @Transactional
+    public void notifyBookingConfirmed(UserEntity driver, UserEntity owner, String garageName) {
+        // 1. Notifica o Motorista
+        sendNotification(
+                driver,
+                "Reserva Confirmada!",
+                "Seu pagamento foi aprovado! Sua vaga na garagem '" + garageName + "' está garantida."
+        );
+
+        // 2. Notifica o Proprietário
+        sendNotification(
+                owner,
+                "Nova Reserva Confirmada!",
+                "Sua garagem '" + garageName + "' foi reservada por " + driver.getName() + "."
+        );
+    }
 }
