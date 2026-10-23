@@ -1,10 +1,10 @@
 -- 1. Inserindo Usuários (Ryan, Vini, Carlos e Ana com Fotos de Perfil)
 INSERT IGNORE INTO users (id, name, email, password, phone_number, photo_url)
 VALUES
-    ('8f07e730-23e1-47b4-a20e-f667b0961303', 'ryan', 'ryan@email.com', '123456789', '11111111111', 'https://estacionaaistorage.blob.core.windows.net/estaciona-ai-images/users%2F631cd830-0cb1-427b-a132-12ba91d2eae0.png'),
-    ('3db8b175-d1e9-4c82-9849-7c136da927a2', 'vini malvadeza', 'vinimalvadeza@email.com', '123456789', '11111111111', 'https://estacionaaistorage.blob.core.windows.net/estaciona-ai-images/users%2Fcd8cd9e2-8539-4a1b-af16-f89de10b1fc8.png'),
-    ('c7d1e892-1234-4a5b-8c9d-111122223333', 'Carlos Silva', 'carlos@email.com', '123456789', '11988887777', 'https://estacionaaistorage.blob.core.windows.net/estaciona-ai-images/users%2F10b10cd7-1e2c-4a64-b540-9e76d3ad9710.png'),
-    ('d8e2f903-5678-4b6c-9d0e-444455556666', 'Ana Souza', 'ana@email.com', '123456789', '11977776666', 'https://estacionaaistorage.blob.core.windows.net/estaciona-ai-images/users%2F6a4926b4-f72a-4c47-baf4-fb142483be43.png');
+    ('8f07e730-23e1-47b4-a20e-f667b0961303', 'ryan', 'ryan@email.com', '123456789', '11111111111', 'https://estacionaaistorage.blob.core.windows.net/estaciona-ai-images/users/2F631cd830-0cb1-427b-a132-12ba91d2eae0.png'),
+    ('3db8b175-d1e9-4c82-9849-7c136da927a2', 'vini malvadeza', 'vinimalvadeza@email.com', '123456789', '11111111111', 'https://estacionaaistorage.blob.core.windows.net/estaciona-ai-images/users/2Fcd8cd9e2-8539-4a1b-af16-f89de10b1fc8.png'),
+    ('c7d1e892-1234-4a5b-8c9d-111122223333', 'Carlos Silva', 'carlos@email.com', '123456789', '11988887777', 'https://estacionaaistorage.blob.core.windows.net/estaciona-ai-images/users/2F10b10cd7-1e2c-4a64-b540-9e76d3ad9710.png'),
+    ('d8e2f903-5678-4b6c-9d0e-444455556666', 'Ana Souza', 'ana@email.com', '123456789', '11977776666', 'https://estacionaaistorage.blob.core.windows.net/estaciona-ai-images/users/2F6a4926b4-f72a-4c47-baf4-fb142483be43.png');
 
 -- 2. Inserindo Garagens
 INSERT IGNORE INTO garages (id, user_id, name, address, latitude, longitude, description, available, price_per_day, price_per_hour, created_at, updated_at)
@@ -157,3 +157,38 @@ VALUES (
     'Ótimo motorista! Pontual e deixou o veículo perfeitamente estacionado.',
     CURRENT_TIMESTAMP
 );
+
+-- 8. Inserindo Notificações dos Usuários
+INSERT IGNORE INTO notifications (id, user_id, title, message, is_read, created_at)
+VALUES
+    -- Notificação para o Ryan (Proprietário)
+    ('c1111111-1111-1111-1111-111111111111',
+     '8f07e730-23e1-47b4-a20e-f667b0961303',
+     'Nova Reserva Confirmada!',
+     'Sua garagem Estacionamento Central Paulista foi reservada por vini malvadeza.',
+     FALSE,
+     CURRENT_TIMESTAMP),
+
+    -- Notificação para o Vini Malvadeza (Motorista)
+    ('c2222222-2222-2222-2222-222222222222',
+     '3db8b175-d1e9-4c82-9849-7c136da927a2',
+     'Reserva Confirmada!',
+     'Seu pagamento foi aprovado! Sua vaga na garagem Estacionamento Central Paulista está garantida.',
+     TRUE,
+     CURRENT_TIMESTAMP),
+
+    -- Notificação para o Carlos Silva (Proprietário)
+    ('c3333333-3333-3333-3333-333333333333',
+     'c7d1e892-1234-4a5b-8c9d-111122223333',
+     'Bem-vindo ao EstacionaAI!',
+     'Sua garagem Estacionamento MASP Consolação já está visível no mapa para os motoristas.',
+     FALSE,
+     CURRENT_TIMESTAMP),
+
+    -- Notificação para a Ana Souza (Proprietária)
+    ('c4444444-4444-4444-4444-444444444444',
+     'd8e2f903-5678-4b6c-9d0e-444455556666',
+     'Perfil Atualizado',
+     'Sua foto de perfil e dados foram atualizados com sucesso.',
+     TRUE,
+     CURRENT_TIMESTAMP);
