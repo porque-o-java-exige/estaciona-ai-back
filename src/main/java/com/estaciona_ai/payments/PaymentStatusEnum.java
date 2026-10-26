@@ -2,7 +2,5 @@ package com.estaciona_ai.payments;
 
 public enum PaymentStatusEnum {
     PENDING,
-    APPROVED,
-    REJECTED,
-    CANCELLED
+    APPROVED
 }

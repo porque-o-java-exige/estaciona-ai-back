@@ -1,6 +1,12 @@
 package com.estaciona_ai.payments;
 
-public record PaymentRequest(
+import java.util.UUID;
 
+public record PaymentRequest(
+        UUID bookingId,
+        PaymentMethodEnum paymentMethod,
+        String payerEmail,
+        String payerCpf,
+        String cardToken
 ) {
 }
