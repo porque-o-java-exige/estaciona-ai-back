@@ -1,5 +1,6 @@
 package com.estaciona_ai.bookings;
 
+import com.estaciona_ai.security.SecurityUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,12 +18,11 @@ import java.util.UUID;
 public class BookingController {
 
     private final BookingService bookingService;
+    private final SecurityUtils securityUtils;
 
     @PostMapping
-    public ResponseEntity<BookingResponse> createBooking(
-            @Valid @RequestBody BookingRequest request,
-            @RequestHeader("x-user-id") UUID driverId
-    ) {
+    public ResponseEntity<BookingResponse> createBooking(@Valid @RequestBody BookingRequest request) {
+        UUID driverId = securityUtils.getAuthenticatedUserId();
         BookingResponse created = bookingService.createBooking(request, driverId);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -33,9 +33,8 @@ public class BookingController {
     }
 
     @GetMapping
-    public ResponseEntity<List<BookingResponse>> getMyBookings(
-            @RequestHeader("x-user-id") UUID driverId
-    ) {
+    public ResponseEntity<List<BookingResponse>> getMyBookings() {
+        UUID driverId = securityUtils.getAuthenticatedUserId();
         return ResponseEntity.ok(bookingService.getBookingsByDriver(driverId));
     }
 
@@ -45,20 +44,14 @@ public class BookingController {
     }
 
     @GetMapping("/garage/{garageId}")
-    public ResponseEntity<List<BookingResponse>> getBookingsByGarage(
-            @PathVariable UUID garageId,
-            @RequestHeader("x-user-id") UUID ownerId
-    ) {
+    public ResponseEntity<List<BookingResponse>> getBookingsByGarage(@PathVariable UUID garageId) {
+        UUID ownerId = securityUtils.getAuthenticatedUserId();
         return ResponseEntity.ok(bookingService.getBookingsByGarage(garageId, ownerId));
     }
 
     @PatchMapping("/{id}/cancel")
-    public ResponseEntity<BookingResponse> cancelBooking(
-            @PathVariable UUID id,
-            @RequestHeader("x-user-id") UUID driverId
-    ) {
+    public ResponseEntity<BookingResponse> cancelBooking(@PathVariable UUID id) {
+        UUID driverId = securityUtils.getAuthenticatedUserId();
         return ResponseEntity.ok(bookingService.cancelBooking(id, driverId));
     }
-
-
 }

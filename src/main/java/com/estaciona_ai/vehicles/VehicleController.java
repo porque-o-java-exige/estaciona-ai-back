@@ -1,5 +1,6 @@
 package com.estaciona_ai.vehicles;
 
+import com.estaciona_ai.security.SecurityUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,50 +18,45 @@ import java.util.UUID;
 public class VehicleController {
 
     private final VehicleService vehicleService;
+    private final SecurityUtils securityUtils;
 
     @PostMapping
-    public ResponseEntity<VehicleResponse> createVehicle(@Valid @RequestBody VehicleRequest vehicleReq, @RequestHeader("x-user-id") UUID ownerId) {
+    public ResponseEntity<VehicleResponse> createVehicle(@Valid @RequestBody VehicleRequest vehicleReq) {
+        UUID ownerId = securityUtils.getAuthenticatedUserId();
         VehicleResponse createdVehicle = vehicleService.createVehicle(vehicleReq, ownerId);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(createdVehicle.id()) // Chamada do record id()
+                .buildAndExpand(createdVehicle.id())
                 .toUri();
 
         return ResponseEntity.created(location).body(createdVehicle);
     }
 
-    // Retorna os veículos do usuário autenticado
     @GetMapping
-    public ResponseEntity<List<VehicleResponse>> getVehiclesByOwner(
-            @RequestHeader("x-user-id") UUID ownerId
-    ) {
-        List<VehicleResponse> vehicles = vehicleService.getVehiclesByOwner(ownerId);
-        return ResponseEntity.ok(vehicles);
+    public ResponseEntity<List<VehicleResponse>> getVehiclesByOwner() {
+        UUID ownerId = securityUtils.getAuthenticatedUserId();
+        return ResponseEntity.ok(vehicleService.getVehiclesByOwner(ownerId));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<VehicleResponse> getVehicleById(@PathVariable UUID id) {
-        VehicleResponse vehicleRes = vehicleService.getVehicleById(id);
-        return ResponseEntity.ok(vehicleRes);
+        return ResponseEntity.ok(vehicleService.getVehicleById(id));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<VehicleResponse> updateVehicleById(
             @PathVariable UUID id,
-            @Valid @RequestBody VehicleRequest vehicleReq, // @Valid adicionado
-            @RequestHeader("x-user-id") UUID ownerId
+            @Valid @RequestBody VehicleRequest vehicleReq
     ) {
-        VehicleResponse vehicleRes = vehicleService.updateVehicleById(id, vehicleReq, ownerId);
-        return ResponseEntity.ok(vehicleRes);
+        UUID ownerId = securityUtils.getAuthenticatedUserId();
+        return ResponseEntity.ok(vehicleService.updateVehicleById(id, vehicleReq, ownerId));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteVehicleById(
-            @PathVariable UUID id,
-            @RequestHeader("x-user-id") UUID ownerId
-    ) {
+    public ResponseEntity<Void> deleteVehicleById(@PathVariable UUID id) {
+        UUID ownerId = securityUtils.getAuthenticatedUserId();
         vehicleService.deleteVehicleById(id, ownerId);
         return ResponseEntity.noContent().build();
     }

@@ -18,7 +18,6 @@ public class JwtService {
     @Value("${application.security.jwt.secret-key:404E635266556A586E3272357538782F413F4428472B4B6250655368566D5970}")
     private String secretKey;
 
-    // 7 Dias em milissegundos (7 * 24 * 60 * 60 * 1000)
     private static final long EXPIRATION_7_DAYS_MS = 604800000L;
 
     public String generateToken(UserEntity user) {
