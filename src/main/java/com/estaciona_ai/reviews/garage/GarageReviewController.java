@@ -1,5 +1,12 @@
 package com.estaciona_ai.reviews.garage;
 
+import com.estaciona_ai.security.SecurityUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -15,33 +22,47 @@ import java.util.UUID;
 @RequestMapping("/garages")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
+@Tag(name = "Avaliações - Garagem", description = "Endpoints para os motoristas avaliarem as garagens onde estacionaram")
 public class GarageReviewController {
 
     private final GarageReviewService garageReviewService;
+    private final SecurityUtils securityUtils;
 
-    // Criar avaliação para uma garagem (Motorista -> Garagem)
+    @Operation(summary = "Avaliar Garagem", description = "Registra uma avaliação do motorista sobre a vaga de garagem utilizada. Identidade do motorista extraída do JWT.")
+    @SecurityRequirement(name = "bearerAuth")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Avaliação da garagem criada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos ou reserva não finalizada"),
+            @ApiResponse(responseCode = "401", description = "Não autorizado")
+    })
     @PostMapping("/reviews")
     public ResponseEntity<GarageReviewResponse> createReview(
-            @Valid @RequestBody GarageReviewRequest request,
-            @RequestHeader("x-user-id") UUID driverId
+            @Valid @RequestBody GarageReviewRequest request
     ) {
+        UUID driverId = securityUtils.getAuthenticatedUserId();
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(garageReviewService.createReview(request, driverId));
     }
 
-    // Listar histórico de avaliações recebidas por uma garagem
+    @Operation(summary = "Listar Avaliações da Garagem", description = "Retorna o histórico paginado de avaliações de uma garagem. Endpoint público.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Página de avaliações da garagem retornada com sucesso")
+    })
     @GetMapping("/{garageId}/reviews")
     public ResponseEntity<Page<GarageReviewResponse>> getGarageReviews(
-            @PathVariable UUID garageId,
+            @Parameter(description = "ID da Garagem", example = "a1111111-1111-1111-1111-111111111111") @PathVariable UUID garageId,
             @PageableDefault(size = 10, page = 0) Pageable pageable
     ) {
         return ResponseEntity.ok(garageReviewService.getGarageReviews(garageId, pageable));
     }
 
-    // Obter nota média e contagem total de avaliações da garagem
+    @Operation(summary = "Obter Média de Avaliações da Garagem", description = "Retorna a nota média e o número total de avaliações recebidas por uma garagem. Endpoint público.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Resumo da nota retornado com sucesso")
+    })
     @GetMapping("/{garageId}/rating")
     public ResponseEntity<GarageRatingSummary> getGarageRatingSummary(
-            @PathVariable UUID garageId
+            @Parameter(description = "ID da Garagem", example = "a1111111-1111-1111-1111-111111111111") @PathVariable UUID garageId
     ) {
         return ResponseEntity.ok(garageReviewService.getGarageRatingSummary(garageId));
     }
