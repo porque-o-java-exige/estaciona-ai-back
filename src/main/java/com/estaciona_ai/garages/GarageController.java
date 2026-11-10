@@ -1,5 +1,6 @@
 package com.estaciona_ai.garages;
 
+import com.estaciona_ai.security.SecurityUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,18 +21,19 @@ import java.util.UUID;
 public class GarageController {
 
     private final GarageService garageService;
+    private final SecurityUtils securityUtils;
 
     @PostMapping
-    public ResponseEntity<GarageResponse> createGarage(
-            @Valid @RequestBody GarageRequest garageReq,
-            @RequestHeader("x-user-id") UUID ownerId
-    ) {
+    public ResponseEntity<GarageResponse> createGarage(@Valid @RequestBody GarageRequest garageReq) {
+        UUID ownerId = securityUtils.getAuthenticatedUserId();
         GarageResponse createdGarage = garageService.createGarage(garageReq, ownerId);
+
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(createdGarage.garageId())
                 .toUri();
+
         return ResponseEntity.created(location).body(createdGarage);
     }
 
@@ -41,17 +43,14 @@ public class GarageController {
     }
 
     @GetMapping("/owner")
-    public ResponseEntity<List<GarageResponse>> getGaragesByOwner(
-            @RequestHeader("x-user-id") UUID ownerId
-    ) {
+    public ResponseEntity<List<GarageResponse>> getGaragesByOwner() {
+        UUID ownerId = securityUtils.getAuthenticatedUserId();
         List<GarageResponse> garages = garageService.getGaragesByOwner(ownerId);
         return ResponseEntity.ok(garages);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GarageResponse> getGarageById(
-            @PathVariable UUID id
-    ) {
+    public ResponseEntity<GarageResponse> getGarageById(@PathVariable UUID id) {
         GarageResponse garageRes = garageService.getGarageById(id);
         return ResponseEntity.ok(garageRes);
     }
@@ -69,20 +68,16 @@ public class GarageController {
     @PutMapping("/{id}")
     public ResponseEntity<GarageResponse> updateGarageById(
             @PathVariable UUID id,
-            @Valid @RequestBody GarageRequest garageReq,
-            @RequestHeader("x-user-id") UUID ownerId
+            @Valid @RequestBody GarageRequest garageReq
     ) {
-        GarageResponse garageRes =
-                garageService.updateGarageById(id, garageReq, ownerId);
-
+        UUID ownerId = securityUtils.getAuthenticatedUserId();
+        GarageResponse garageRes = garageService.updateGarageById(id, garageReq, ownerId);
         return ResponseEntity.ok(garageRes);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteGarageById(
-            @PathVariable UUID id,
-            @RequestHeader("x-user-id") UUID ownerId
-    ) {
+    public ResponseEntity<Void> deleteGarageById(@PathVariable UUID id) {
+        UUID ownerId = securityUtils.getAuthenticatedUserId();
         garageService.deleteGarageById(id, ownerId);
         return ResponseEntity.noContent().build();
     }

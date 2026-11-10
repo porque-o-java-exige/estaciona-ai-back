@@ -53,16 +53,21 @@ public class ChatService {
     }
 
     @Transactional
-    public ChatMessageResponse saveMessage(ChatMessageRequest payload) {
+    public ChatMessageResponse saveMessage(ChatMessageRequest payload, UUID senderId) {
         ChatRoomEntity room = chatRoomRepository.findById(payload.roomId())
-                .orElseThrow(() -> new EntityNotFoundException("Sala não encontrada: " + payload.roomId()));
+                .orElseThrow(() -> new EntityNotFoundException("Sala de chat não encontrada: " + payload.roomId()));
 
-        UserEntity sender = userRepository.findById(payload.senderId())
-                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado: " + payload.senderId()));
+        // Valida se o remetente autenticado pertence a esta sala de chat
+        if (!room.getDriver().getId().equals(senderId) && !room.getOwner().getId().equals(senderId)) {
+            throw new IllegalArgumentException("Usuário não possui permissão para enviar mensagens nesta sala.");
+        }
+
+        // Obtém referência da entidade sem disparar SELECT no banco de dados
+        UserEntity senderRef = userRepository.getReferenceById(senderId);
 
         ChatMessageEntity message = new ChatMessageEntity();
         message.setChatRoom(room);
-        message.setSender(sender);
+        message.setSender(senderRef);
         message.setContent(payload.content());
 
         ChatMessageEntity saved = chatMessageRepository.save(message);
@@ -70,7 +75,7 @@ public class ChatService {
         return new ChatMessageResponse(
                 saved.getId(),
                 room.getId(),
-                sender.getId(),
+                senderId,
                 saved.getContent(),
                 saved.getCreatedAt()
         );
@@ -87,7 +92,7 @@ public class ChatService {
     @Transactional(readOnly = true)
     public List<ChatMessageResponse> getRoomMessages(UUID roomId, UUID userId) {
         ChatRoomEntity room = chatRoomRepository.findById(roomId)
-                .orElseThrow(() -> new EntityNotFoundException("Sala não encontrada"));
+                .orElseThrow(() -> new EntityNotFoundException("Sala de chat não encontrada: " + roomId));
 
         if (!room.getDriver().getId().equals(userId) && !room.getOwner().getId().equals(userId)) {
             throw new IllegalArgumentException("Acesso negado a este chat.");
@@ -95,7 +100,13 @@ public class ChatService {
 
         return chatMessageRepository.findByChatRoomIdOrderByCreatedAtAsc(roomId)
                 .stream()
-                .map(m -> new ChatMessageResponse(m.getId(), roomId, m.getSender().getId(), m.getContent(), m.getCreatedAt()))
+                .map(m -> new ChatMessageResponse(
+                        m.getId(),
+                        roomId,
+                        m.getSender().getId(),
+                        m.getContent(),
+                        m.getCreatedAt()
+                ))
                 .toList();
     }
 

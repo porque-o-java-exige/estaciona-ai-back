@@ -1,10 +1,10 @@
--- 1. Inserindo Usuários (Ryan, Vini, Carlos e Ana com Fotos de Perfil)
+-- 1. Inserindo Usuários com Senhas Criptografadas (BCrypt)
 INSERT IGNORE INTO users (id, name, email, password, phone_number, photo_url)
 VALUES
-    ('8f07e730-23e1-47b4-a20e-f667b0961303', 'ryan', 'ryan@email.com', '123456789', '11111111111', 'https://estacionaaistorage.blob.core.windows.net/estaciona-ai-images/users/2F631cd830-0cb1-427b-a132-12ba91d2eae0.png'),
-    ('3db8b175-d1e9-4c82-9849-7c136da927a2', 'vini malvadeza', 'vinimalvadeza@email.com', '123456789', '11111111111', 'https://estacionaaistorage.blob.core.windows.net/estaciona-ai-images/users/2Fcd8cd9e2-8539-4a1b-af16-f89de10b1fc8.png'),
-    ('c7d1e892-1234-4a5b-8c9d-111122223333', 'Carlos Silva', 'carlos@email.com', '123456789', '11988887777', 'https://estacionaaistorage.blob.core.windows.net/estaciona-ai-images/users/2F10b10cd7-1e2c-4a64-b540-9e76d3ad9710.png'),
-    ('d8e2f903-5678-4b6c-9d0e-444455556666', 'Ana Souza', 'ana@email.com', '123456789', '11977776666', 'https://estacionaaistorage.blob.core.windows.net/estaciona-ai-images/users/2F6a4926b4-f72a-4c47-baf4-fb142483be43.png');
+    ('8f07e730-23e1-47b4-a20e-f667b0961303', 'ryan', 'ryan@email.com', '$2a$10$8.UnVuG9HHgffUDAlk8qfOuVGkqRzgVym5W0.m2pWJbH8C./B5T0G', '11111111111', 'https://estacionaaistorage.blob.core.windows.net/estaciona-ai-images/users/2F631cd830-0cb1-427b-a132-12ba91d2eae0.png'),
+    ('3db8b175-d1e9-4c82-9849-7c136da927a2', 'vini malvadeza', 'vinimalvadeza@email.com', '$2a$10$8.UnVuG9HHgffUDAlk8qfOuVGkqRzgVym5W0.m2pWJbH8C./B5T0G', '11111111111', 'https://estacionaaistorage.blob.core.windows.net/estaciona-ai-images/users/2Fcd8cd9e2-8539-4a1b-af16-f89de10b1fc8.png'),
+    ('c7d1e892-1234-4a5b-8c9d-111122223333', 'Carlos Silva', 'carlos@email.com', '$2a$10$8.UnVuG9HHgffUDAlk8qfOuVGkqRzgVym5W0.m2pWJbH8C./B5T0G', '11988887777', 'https://estacionaaistorage.blob.core.windows.net/estaciona-ai-images/users/2F10b10cd7-1e2c-4a64-b540-9e76d3ad9710.png'),
+    ('d8e2f903-5678-4b6c-9d0e-444455556666', 'Ana Souza', 'ana@email.com', '$2a$10$8.UnVuG9HHgffUDAlk8qfOuVGkqRzgVym5W0.m2pWJbH8C./B5T0G', '11977776666', 'https://estacionaaistorage.blob.core.windows.net/estaciona-ai-images/users/2F6a4926b4-f72a-4c47-baf4-fb142483be43.png');
 
 -- 2. Inserindo Garagens
 INSERT IGNORE INTO garages (id, user_id, name, address, latitude, longitude, description, available, price_per_day, price_per_hour, created_at, updated_at)
