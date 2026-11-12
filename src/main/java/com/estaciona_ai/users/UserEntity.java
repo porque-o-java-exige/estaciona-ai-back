@@ -1,4 +1,36 @@
 package com.estaciona_ai.users;
 
+import com.estaciona_ai.enums.RolesEnum;
+import com.estaciona_ai.enums.StatusEnum;
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@Table(name = "users")
 public class UserEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
+    private String name;
+    @Column(unique = true)
+    private String email;
+    private String password;
+    private String phoneNumber;
+    @Column(name = "photo_url")
+    private String photoUrl;
+    @Enumerated(EnumType.STRING)
+    private RolesEnum roles;
+    @Enumerated(EnumType.STRING)
+    private StatusEnum status;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }
