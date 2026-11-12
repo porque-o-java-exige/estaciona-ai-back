@@ -15,7 +15,7 @@ import java.util.Date;
 @Service
 public class JwtService {
 
-    @Value("${application.security.jwt.secret-key:404E635266556A586E3272357538782F413F4428472B4B6250655368566D5970}")
+    @Value("${application.security.jwt.secret-key}")
     private String secretKey;
 
     private static final long EXPIRATION_7_DAYS_MS = 604800000L;
