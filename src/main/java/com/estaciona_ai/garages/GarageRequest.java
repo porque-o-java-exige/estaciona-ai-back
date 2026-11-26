@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Set;
 
 @Schema(description = "Dados para cadastro ou alteração de uma garagem")
@@ -43,6 +44,13 @@ public record GarageRequest(
 
         @Schema(description = "Valor cobrado por hora de uso (R$)", example = "12.00")
         @DecimalMin("0.0")
-        BigDecimal pricePerHour
+        BigDecimal pricePerHour,
+
+        @Schema(description = "URL da imagem principal de capa da garagem", example = "https://estacionaaistorage.blob.core.windows.net/estaciona-ai-images/garages/cover.jpg")
+        @Size(max = 1000)
+        String coverImageUrl,
+
+        @Schema(description = "Lista com URLs das imagens da garagem")
+        List<@NotBlank @Size(max = 1000) String> images
 ) {
 }
