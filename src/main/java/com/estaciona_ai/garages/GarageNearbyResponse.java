@@ -32,5 +32,11 @@ public record GarageNearbyResponse(
         Boolean available,
 
         @Schema(description = "Distância estimada em quilômetros em relação ao ponto buscado", example = "1.25")
-        Double distanceInKm
+        Double distanceInKm,
+
+        @Schema(description = "URL da imagem de capa da garagem", example = "https://estacionaaistorage.blob.core.windows.net/estaciona-ai-images/garages/cover.jpg")
+        String coverImageUrl,
+
+        @Schema(description = "Descrição da vaga", example = "Vaga coberta e com vigilância 24h.")
+        String description
 ) {}
