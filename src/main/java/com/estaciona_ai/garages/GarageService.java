@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,15 +24,17 @@ public class GarageService {
     private final UserRepository userRepository;
     private final GarageMapper garageMapper;
 
-    // Create garage method
     @Transactional
     public GarageResponse createGarage(GarageRequest garageReq, UUID ownerId) {
         UserEntity owner = userRepository.findById(ownerId)
                 .orElseThrow(() ->
                         new EntityNotFoundException("Usuário não encontrado"));
         validateGaragePricing(garageReq);
+
         GarageEntity garage = garageMapper.toEntity(garageReq);
         garage.setOwner(owner);
+        syncGarageMediaAndCollections(garageReq, garage);
+
         return garageMapper.toResponse(
                 garageRepository.save(garage)
         );
@@ -88,7 +92,9 @@ public class GarageService {
                     garage.getPricePerHour(),
                     garage.getPricePerDay(),
                     garage.getAvailable(),
-                    roundedDistance
+                    roundedDistance,
+                    garage.getCoverImageUrl(),
+                    garage.getDescription()
             );
         });
     }
@@ -110,7 +116,10 @@ public class GarageService {
             );
         }
         validateGaragePricing(garageReq);
+
         garageMapper.updateEntityFromDto(garageReq, garage);
+        syncGarageMediaAndCollections(garageReq, garage);
+
         return garageMapper.toResponse(
                 garageRepository.save(garage)
         );
@@ -131,15 +140,34 @@ public class GarageService {
         garageRepository.delete(garage);
     }
 
+    private void syncGarageMediaAndCollections(GarageRequest request, GarageEntity garage) {
+        garage.setFeatures(
+                request.features() != null ? new HashSet<>(request.features()) : new HashSet<>()
+        );
+
+        List<String> incomingImages = request.images() != null
+                ? new ArrayList<>(request.images())
+                : new ArrayList<>();
+
+        String cover = request.coverImageUrl();
+        if ((cover == null || cover.isBlank()) && !incomingImages.isEmpty()) {
+            cover = incomingImages.get(0);
+        } else if (cover != null && !cover.isBlank() && !incomingImages.contains(cover)) {
+            incomingImages.add(0, cover);
+        }
+
+        garage.setCoverImageUrl(cover);
+        garage.setImages(incomingImages);
+    }
+
     private void validateGaragePricing(GarageRequest request) {
-        // Se ambos os preços vierem null no JSON, lança exceção
         if (request.pricePerHour() == null && request.pricePerDay() == null) {
             throw new IllegalArgumentException("A garagem deve ter pelo menos um preço cadastrado (por hora ou por dia).");
         }
     }
 
     private double calculateHaversineDistance(double lat1, double lon1, double lat2, double lon2) {
-        final int R = 6371; // Raio médio da Terra em km
+        final int R = 6371;
         double latDistance = Math.toRadians(lat2 - lat1);
         double lonDistance = Math.toRadians(lon2 - lon1);
         double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
